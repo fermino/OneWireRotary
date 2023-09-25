@@ -1,38 +1,62 @@
 /*
- * Rotary encoder library for Arduino.
+ * Rotary encoder handler for arduino.
+ *
+ * Copyright 2011 Ben Buxton.
+ * Licenced under the GNU GPL Version 3.
+ *
+ * Rewritten and adapted by Fermín Olaiz (@fermino) to handle an encoder with
+ * only one pin using a voltage divider.
+ *
+ * Contact:
+ *  bb@cactii.net
+ *  ferminolaiz@gmail.com
  */
 
-#ifndef Rotary_h
-#define Rotary_h
+#ifndef OneWireRotary_h
+#define OneWireRotary_h
 
 #include "Arduino.h"
 
 // Enable this to emit codes twice per step.
 // #define HALF_STEP
 
-// Values returned by 'process'
-// No complete step yet.
-#define DIR_NONE 0x0
-// Clockwise step.
-#define DIR_CW 0x10
-// Counter-clockwise step.
-#define DIR_CCW 0x20
+#define ROTARY_PRESSED  (true)
+#define ROTARY_RELEASED (false)
 
-class Rotary
+#define ROTARY_DIR_CW (0x10)
+#define ROTARY_DIR_CCW (0x20)
+
+
+/**
+ * Wiring for the rotary encoder:
+ *       ┌─────────┐
+ * GND───┤         ├───10k───GND
+ *       │         │              ┌───10k───VCC
+ *       │         ├──────────────┤
+ *       │         │              └───ADC
+ * ADC───┤         ├───22k───GND
+ *       └─────────┘
+ */
+
+class OneWireRotary
 {
-  public:
-    Rotary(char, char);
-    unsigned char process();
-    void begin(bool internalPullup=true, bool flipLogicForPulldown=false);
-  
-    inline unsigned char pin_1() const { return pin1; }
-    inline unsigned char pin_2() const { return pin2; }
-  private:
-    unsigned char state;
-    unsigned char pin1;
-    unsigned char pin2;
-    unsigned char inverter;
+private:
+    uint8_t input_pin;
+    uint16_t expected_a_value;
+    uint16_t expected_b_value;
+    uint16_t variance;
+    uint16_t expected_ab_value;
+
+    uint8_t state;
+    int16_t position;
+public:
+    OneWireRotary(uint8_t input_pin, uint16_t expected_a_value, uint16_t expected_b_value, uint16_t variance);
+    void begin();
+
+    bool poll();
+
+    uint16_t getPosition();
+    void resetPosition();
 };
 
 #endif
- 
