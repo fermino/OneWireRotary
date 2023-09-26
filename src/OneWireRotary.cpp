@@ -23,6 +23,8 @@
 
 #define R_START 0x0
 
+#define HALF_STEP
+
 #ifdef HALF_STEP
 // Use the half-step state table (emits a code at 00 and 11)
 #define R_CCW_BEGIN 0x1
@@ -34,15 +36,15 @@ const unsigned char rotary_ttable[6][4] = {
   // R_START (00)
   {R_START_M,            R_CW_BEGIN,     R_CCW_BEGIN,  R_START},
   // R_CCW_BEGIN
-  {R_START_M | DIR_CCW, R_START,        R_CCW_BEGIN,  R_START},
+  {R_START_M | ROTARY_DIR_CCW, R_START,        R_CCW_BEGIN,  R_START},
   // R_CW_BEGIN
-  {R_START_M | DIR_CW,  R_CW_BEGIN,     R_START,      R_START},
+  {R_START_M | ROTARY_DIR_CW,  R_CW_BEGIN,     R_START,      R_START},
   // R_START_M (11)
   {R_START_M,            R_CCW_BEGIN_M,  R_CW_BEGIN_M, R_START},
   // R_CW_BEGIN_M
-  {R_START_M,            R_START_M,      R_CW_BEGIN_M, R_START | DIR_CW},
+  {R_START_M,            R_START_M,      R_CW_BEGIN_M, R_START | ROTARY_DIR_CW},
   // R_CCW_BEGIN_M
-  {R_START_M,            R_CCW_BEGIN_M,  R_START_M,    R_START | DIR_CCW},
+  {R_START_M,            R_CCW_BEGIN_M,  R_START_M,    R_START | ROTARY_DIR_CCW},
 };
 #else
 // Use the full-step state table (emits a code at 00 only)
@@ -115,11 +117,12 @@ bool OneWireRotary::poll() {
 
     this->state = rotary_ttable[this->state & 0xf][ab];
 
-    switch (this->state & 0x30) {
-        case ROTARY_DIR_CW:
-            position++;
-        case ROTARY_DIR_CCW:
-            position--;
+    if ((this->state & 0x30) == ROTARY_DIR_CW) {
+        position++;
+    }
+
+    if ((this->state & 0x30) == ROTARY_DIR_CCW) {
+        position--;
     }
 
     return ROTARY_RELEASED;
