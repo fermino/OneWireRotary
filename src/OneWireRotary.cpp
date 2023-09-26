@@ -37,7 +37,7 @@ OneWireRotary::OneWireRotary(uint8_t input_pin, uint16_t expected_a_value, uint1
     double R2ab = 1.f / (1.f / R2a + 1.f / R2b);
     this->expected_ab_value = R2ab / (1.f + R2ab) * 1023.f;
 
-    this->rotary_state = R_START;
+    this->state = R_START;
     this->resetPosition();
 }
 
