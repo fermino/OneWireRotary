@@ -8,17 +8,17 @@
  */
 const unsigned char rotary_state_table[6][4] = {
   // R_START (00)
-  {R_START_M,                   R_CW_BEGIN,     R_CCW_BEGIN,    R_START},
+  {R_START_M,               R_CW_BEGIN,     R_CCW_BEGIN,    R_START},
   // R_CCW_BEGIN
-  {R_START_M | ROTARY_DIR_CCW,  R_START,        R_CCW_BEGIN,    R_START},
+  {R_START_M | R_DIR_CCW,   R_START,        R_CCW_BEGIN,    R_START},
   // R_CW_BEGIN
-  {R_START_M | ROTARY_DIR_CW,   R_CW_BEGIN,     R_START,        R_START},
+  {R_START_M | R_DIR_CW,    R_CW_BEGIN,     R_START,        R_START},
   // R_START_M (11)
-  {R_START_M,                   R_CCW_BEGIN_M,  R_CW_BEGIN_M,   R_START},
+  {R_START_M,               R_CCW_BEGIN_M,  R_CW_BEGIN_M,   R_START},
   // R_CW_BEGIN_M
-  {R_START_M,                   R_START_M,      R_CW_BEGIN_M,   R_START | ROTARY_DIR_CW},
+  {R_START_M,               R_START_M,      R_CW_BEGIN_M,   R_START | R_DIR_CW},
   // R_CCW_BEGIN_M
-  {R_START_M,                   R_CCW_BEGIN_M,  R_START_M,      R_START | ROTARY_DIR_CCW},
+  {R_START_M,               R_CCW_BEGIN_M,  R_START_M,      R_START | R_DIR_CCW},
 };
 
 OneWireRotary::OneWireRotary(uint8_t input_pin, uint16_t expected_a_value, uint16_t expected_b_value, uint16_t variance) {
@@ -38,18 +38,28 @@ OneWireRotary::OneWireRotary(uint8_t input_pin, uint16_t expected_a_value, uint1
     this->expected_ab_value = R2ab / (1.f + R2ab) * 1023.f;
 
     this->state = R_START;
-    this->resetPosition();
+    this->position = 0;
+
+    this->button_pressed = false;
+    this->button_handled = false;
 }
 
 void OneWireRotary::begin() {
     pinMode(this->input_pin, INPUT);
 }
 
-bool OneWireRotary::poll() {
-    uint16_t reading = analogRead(this->input_pin);
+void OneWireRotary::poll() {
+    uint16_t reading = analogRead(input_pin);
 
-    if (reading <= 0 + variance) {
-        return ROTARY_PRESSED;
+    if (reading <= 0 + this->variance) {
+        button_pressed = true;
+        return;
+    }
+
+    // If the button isn't press and has been handled
+    if (this->button_handled) {
+        this->button_pressed = false;
+        this->button_handled = false;
     }
 
     uint8_t ab;
@@ -65,20 +75,27 @@ bool OneWireRotary::poll() {
 
     this->state = rotary_state_table[this->state & 0xf][ab];
 
-    if ((this->state & 0x30) == ROTARY_DIR_CW) {
+    if ((this->state & 0x30) == R_DIR_CW) {
         position++;
-    } else if ((this->state & 0x30) == ROTARY_DIR_CCW) {
+    } else if ((this->state & 0x30) == R_DIR_CCW) {
         position--;
     }
-
-    return ROTARY_RELEASED;
 }
 
-int16_t OneWireRotary::getPosition() {
-    return this->position;
-};
+uint8_t OneWireRotary::handle() {
+    // If the button has been pressed and hasn't been handled yet
+    if (this->button_pressed && !this->button_handled) {
+        button_handled = true;
+        return ROTARY_PRESSED;
+    }
 
-void OneWireRotary::resetPosition() {
-    this->position = 0;
+    if (this->position > 0) {
+        position--;
+        return ROTARY_CW;
+    } else if (this->position < 0) {
+        position++;
+        return ROTARY_CCW;
+    }
+
+    return ROTARY_NONE;
 }
-

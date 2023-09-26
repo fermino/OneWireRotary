@@ -14,11 +14,10 @@
 
 #include "Arduino.h"
 
-#define ROTARY_DIR_CW   (0x10)
-#define ROTARY_DIR_CCW  (0x20)
-
-#define ROTARY_PRESSED  (true)
-#define ROTARY_RELEASED (false)
+#define ROTARY_NONE     (0x00)
+#define ROTARY_PRESSED  (0x01)
+#define ROTARY_CW       (0x02)
+#define ROTARY_CCW      (0x03)
 
 // Half-step table
 #define R_START         (0x0)
@@ -27,6 +26,10 @@
 #define R_START_M       (0x3)
 #define R_CW_BEGIN_M    (0x4)
 #define R_CCW_BEGIN_M   (0x5)
+
+// Internal codes
+#define R_DIR_CW   (0x10)
+#define R_DIR_CCW  (0x20)
 
 class OneWireRotary
 {
@@ -39,14 +42,15 @@ private:
 
     uint8_t state;
     int16_t position;
+
+    bool button_pressed;
+    bool button_handled;
 public:
     OneWireRotary(uint8_t input_pin, uint16_t expected_a_value, uint16_t expected_b_value, uint16_t variance);
     void begin();
+    void poll();
 
-    bool poll();
-
-    int16_t getPosition();
-    void resetPosition();
+    uint8_t handle();
 };
 
 #endif
