@@ -1,18 +1,6 @@
 #ifndef OneWireRotary_h
 #define OneWireRotary_h
 
-#include "Arduino.h"
-
-// Enable this to emit codes twice per step.
-// #define HALF_STEP
-
-#define ROTARY_PRESSED  (true)
-#define ROTARY_RELEASED (false)
-
-#define ROTARY_DIR_CW (0x10)
-#define ROTARY_DIR_CCW (0x20)
-
-
 /**
  * Wiring for the rotary encoder:
  *       ┌─────────┐
@@ -23,6 +11,22 @@
  * ADC───┤         ├───22k───GND
  *       └─────────┘
  */
+
+#include "Arduino.h"
+
+#define ROTARY_DIR_CW   (0x10)
+#define ROTARY_DIR_CCW  (0x20)
+
+#define ROTARY_PRESSED  (true)
+#define ROTARY_RELEASED (false)
+
+// Half-step table
+#define R_START         (0x0)
+#define R_CCW_BEGIN     (0x1)
+#define R_CW_BEGIN      (0x2)
+#define R_START_M       (0x3)
+#define R_CW_BEGIN_M    (0x4)
+#define R_CCW_BEGIN_M   (0x5)
 
 class OneWireRotary
 {

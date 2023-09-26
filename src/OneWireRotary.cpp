@@ -6,58 +6,20 @@
  * the table, the encoder outputs are 00, 01, 10, 11, and the value
  * in that position is the new state to set.
  */
-
-#define R_START 0x0
-
-#define HALF_STEP
-
-#ifdef HALF_STEP
-// Use the half-step state table (emits a code at 00 and 11)
-#define R_CCW_BEGIN 0x1
-#define R_CW_BEGIN 0x2
-#define R_START_M 0x3
-#define R_CW_BEGIN_M 0x4
-#define R_CCW_BEGIN_M 0x5
-const unsigned char rotary_ttable[6][4] = {
+const unsigned char rotary_state_table[6][4] = {
   // R_START (00)
-  {R_START_M,            R_CW_BEGIN,     R_CCW_BEGIN,  R_START},
+  {R_START_M,                   R_CW_BEGIN,     R_CCW_BEGIN,    R_START},
   // R_CCW_BEGIN
-  {R_START_M | ROTARY_DIR_CCW, R_START,        R_CCW_BEGIN,  R_START},
+  {R_START_M | ROTARY_DIR_CCW,  R_START,        R_CCW_BEGIN,    R_START},
   // R_CW_BEGIN
-  {R_START_M | ROTARY_DIR_CW,  R_CW_BEGIN,     R_START,      R_START},
+  {R_START_M | ROTARY_DIR_CW,   R_CW_BEGIN,     R_START,        R_START},
   // R_START_M (11)
-  {R_START_M,            R_CCW_BEGIN_M,  R_CW_BEGIN_M, R_START},
+  {R_START_M,                   R_CCW_BEGIN_M,  R_CW_BEGIN_M,   R_START},
   // R_CW_BEGIN_M
-  {R_START_M,            R_START_M,      R_CW_BEGIN_M, R_START | ROTARY_DIR_CW},
+  {R_START_M,                   R_START_M,      R_CW_BEGIN_M,   R_START | ROTARY_DIR_CW},
   // R_CCW_BEGIN_M
-  {R_START_M,            R_CCW_BEGIN_M,  R_START_M,    R_START | ROTARY_DIR_CCW},
+  {R_START_M,                   R_CCW_BEGIN_M,  R_START_M,      R_START | ROTARY_DIR_CCW},
 };
-#else
-// Use the full-step state table (emits a code at 00 only)
-#define R_CW_FINAL 0x1
-#define R_CW_BEGIN 0x2
-#define R_CW_NEXT 0x3
-#define R_CCW_BEGIN 0x4
-#define R_CCW_FINAL 0x5
-#define R_CCW_NEXT 0x6
-
-const unsigned char rotary_ttable[7][4] = {
-  // R_START
-  {R_START,    R_CW_BEGIN,  R_CCW_BEGIN, R_START},
-  // R_CW_FINAL
-  {R_CW_NEXT,  R_START,     R_CW_FINAL,  R_START | ROTARY_DIR_CW},
-  // R_CW_BEGIN
-  {R_CW_NEXT,  R_CW_BEGIN,  R_START,     R_START},
-  // R_CW_NEXT
-  {R_CW_NEXT,  R_CW_BEGIN,  R_CW_FINAL,  R_START},
-  // R_CCW_BEGIN
-  {R_CCW_NEXT, R_START,     R_CCW_BEGIN, R_START},
-  // R_CCW_FINAL
-  {R_CCW_NEXT, R_CCW_FINAL, R_START,     R_START | ROTARY_DIR_CCW},
-  // R_CCW_NEXT
-  {R_CCW_NEXT, R_CCW_FINAL, R_CCW_BEGIN, R_START},
-};
-#endif
 
 OneWireRotary::OneWireRotary(uint8_t input_pin, uint16_t expected_a_value, uint16_t expected_b_value, uint16_t variance) {
     this->input_pin = input_pin;
@@ -75,7 +37,7 @@ OneWireRotary::OneWireRotary(uint8_t input_pin, uint16_t expected_a_value, uint1
     double R2ab = 1.f / (1.f / R2a + 1.f / R2b);
     this->expected_ab_value = R2ab / (1.f + R2ab) * 1023.f;
 
-    this->state = R_START;
+    this->rotary_state = R_START;
     this->resetPosition();
 }
 
@@ -101,7 +63,7 @@ bool OneWireRotary::poll() {
         ab = 0b00;
     }
 
-    this->state = rotary_ttable[this->state & 0xf][ab];
+    this->state = rotary_state_table[this->state & 0xf][ab];
 
     if ((this->state & 0x30) == ROTARY_DIR_CW) {
         position++;
