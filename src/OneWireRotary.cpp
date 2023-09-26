@@ -119,9 +119,7 @@ bool OneWireRotary::poll() {
 
     if ((this->state & 0x30) == ROTARY_DIR_CW) {
         position++;
-    }
-
-    if ((this->state & 0x30) == ROTARY_DIR_CCW) {
+    } else if ((this->state & 0x30) == ROTARY_DIR_CCW) {
         position--;
     }
 
