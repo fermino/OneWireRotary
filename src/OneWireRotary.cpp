@@ -1,17 +1,3 @@
-/*
- * Rotary encoder handler for arduino.
- *
- * Copyright 2011 Ben Buxton.
- * Licenced under the GNU GPL Version 3.
- *
- * Rewritten and adapted by Fermín Olaiz (@fermino) to handle an encoder with
- * only one pin using a voltage divider.
- *
- * Contact:
- *  bb@cactii.net
- *  ferminolaiz@gmail.com
- */
-
 #include "OneWireRotary.h"
 
 /*
