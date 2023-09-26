@@ -125,7 +125,7 @@ bool OneWireRotary::poll() {
     return ROTARY_RELEASED;
 }
 
-uint16_t OneWireRotary::getPosition() {
+int16_t OneWireRotary::getPosition() {
     return this->position;
 };
 

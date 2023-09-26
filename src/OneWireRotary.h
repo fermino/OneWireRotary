@@ -55,7 +55,7 @@ public:
 
     bool poll();
 
-    uint16_t getPosition();
+    int16_t getPosition();
     void resetPosition();
 };
 
