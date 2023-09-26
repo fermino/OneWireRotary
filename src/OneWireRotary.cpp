@@ -82,10 +82,10 @@ OneWireRotary::OneWireRotary(uint8_t input_pin, uint16_t expected_a_value, uint1
      * expected values for A and B, and a assumed R1 of 1. Since we use only
      * relative values it shouldn't matter :)
      */
-    double Ra = 1.f / (1023.f / (double)expected_a_value) - 1.f;
-    double Rb = 1.f / (1023.f / (double)expected_b_value) - 1.f;
-    double Rab = 1.f / (1.f / Ra + 1.f / Rb);
-    this->expected_ab_value = Rab / (1.f + Rab) * 1023.f;
+    double R2a = ((double)expected_a_value * 1.f) / (1023.f - (double)expected_a_value);
+    double R2b = ((double)expected_b_value * 1.f) / (1023.f - (double)expected_b_value);
+    double R2ab = 1.f / (1.f / R2a + 1.f / R2b);
+    this->expected_ab_value = R2ab / (1.f + R2ab) * 1023.f;
 
     this->state = R_START;
     this->resetPosition();
