@@ -103,11 +103,11 @@ bool OneWireRotary::poll() {
     }
 
     uint8_t ab;
-    if (reading > expected_ab_value - this->variance || reading < expected_ab_value + this->variance) {
+    if (reading > expected_ab_value - this->variance && reading < expected_ab_value + this->variance) {
         ab = 0b11;
-    } else if (reading > expected_a_value - this->variance || reading < expected_a_value + this->variance) {
+    } else if (reading > expected_a_value - this->variance && reading < expected_a_value + this->variance) {
         ab = 0b10;
-    } else if (reading > expected_b_value - this->variance || reading < expected_b_value + this->variance) {
+    } else if (reading > expected_b_value - this->variance && reading < expected_b_value + this->variance) {
         ab = 0b01;
     } else {
         ab = 0b00;
@@ -132,3 +132,4 @@ uint16_t OneWireRotary::getPosition() {
 void OneWireRotary::resetPosition() {
     this->position = 0;
 }
+
