@@ -6,20 +6,39 @@
  * the table, the encoder outputs are 00, 01, 10, 11, and the value
  * in that position is the new state to set.
  */
-const unsigned char rotary_state_table[6][4] = {
-  // R_START (00)
-  {R_START_M,               R_CW_BEGIN,     R_CCW_BEGIN,    R_START},
-  // R_CCW_BEGIN
-  {R_START_M | R_DIR_CCW,   R_START,        R_CCW_BEGIN,    R_START},
-  // R_CW_BEGIN
-  {R_START_M | R_DIR_CW,    R_CW_BEGIN,     R_START,        R_START},
-  // R_START_M (11)
-  {R_START_M,               R_CCW_BEGIN_M,  R_CW_BEGIN_M,   R_START},
-  // R_CW_BEGIN_M
-  {R_START_M,               R_START_M,      R_CW_BEGIN_M,   R_START | R_DIR_CW},
-  // R_CCW_BEGIN_M
-  {R_START_M,               R_CCW_BEGIN_M,  R_START_M,      R_START | R_DIR_CCW},
-};
+#ifdef ROTARY_HALF_STEP
+    const unsigned char rotary_state_table[6][4] = {
+        // R_START (00)
+        {R_START_M,               R_CW_BEGIN,     R_CCW_BEGIN,    R_START},
+        // R_CCW_BEGIN
+        {R_START_M | R_DIR_CCW,   R_START,        R_CCW_BEGIN,    R_START},
+        // R_CW_BEGIN
+        {R_START_M | R_DIR_CW,    R_CW_BEGIN,     R_START,        R_START},
+        // R_START_M (11)
+        {R_START_M,               R_CCW_BEGIN_M,  R_CW_BEGIN_M,   R_START},
+        // R_CW_BEGIN_M
+        {R_START_M,               R_START_M,      R_CW_BEGIN_M,   R_START | R_DIR_CW},
+        // R_CCW_BEGIN_M
+        {R_START_M,               R_CCW_BEGIN_M,  R_START_M,      R_START | R_DIR_CCW},
+    };
+#else
+    const unsigned char rotary_state_table[7][4] = {
+        // R_START
+        {R_START,    R_CW_BEGIN,  R_CCW_BEGIN, R_START},
+        // R_CW_FINAL
+        {R_CW_NEXT,  R_START,     R_CW_FINAL,  R_START | R_DIR_CW},
+        // R_CW_BEGIN
+        {R_CW_NEXT,  R_CW_BEGIN,  R_START,     R_START},
+        // R_CW_NEXT
+        {R_CW_NEXT,  R_CW_BEGIN,  R_CW_FINAL,  R_START},
+        // R_CCW_BEGIN
+        {R_CCW_NEXT, R_START,     R_CCW_BEGIN, R_START},
+        // R_CCW_FINAL
+        {R_CCW_NEXT, R_CCW_FINAL, R_START,     R_START | R_DIR_CCW},
+        // R_CCW_NEXT
+        {R_CCW_NEXT, R_CCW_FINAL, R_CCW_BEGIN, R_START},
+    };
+#endif
 
 OneWireRotary::OneWireRotary(uint8_t input_pin, uint16_t expected_a_value, uint16_t expected_b_value, uint16_t variance) {
     this->input_pin = input_pin;

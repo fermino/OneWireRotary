@@ -19,13 +19,24 @@
 #define ROTARY_CW       (0x02)
 #define ROTARY_CCW      (0x03)
 
-// Half-step table
-#define R_START         (0x0)
-#define R_CCW_BEGIN     (0x1)
-#define R_CW_BEGIN      (0x2)
-#define R_START_M       (0x3)
-#define R_CW_BEGIN_M    (0x4)
-#define R_CCW_BEGIN_M   (0x5)
+#ifdef ROTARY_HALF_STEP
+    // Half-step table
+    #define R_START         (0x0)
+    #define R_CCW_BEGIN     (0x1)
+    #define R_CW_BEGIN      (0x2)
+    #define R_START_M       (0x3)
+    #define R_CW_BEGIN_M    (0x4)
+    #define R_CCW_BEGIN_M   (0x5)
+#else
+    // Use the full-step state table (emits a code at 00 only)
+    #define R_START     (0x0)
+    #define R_CW_FINAL  (0x1)
+    #define R_CW_BEGIN  (0x2)
+    #define R_CW_NEXT   (0x3)
+    #define R_CCW_BEGIN (0x4)
+    #define R_CCW_FINAL (0x5)
+    #define R_CCW_NEXT  (0x6)
+#endif
 
 // Internal codes
 #define R_DIR_CW   (0x10)
